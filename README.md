@@ -1,100 +1,94 @@
-PDF Chatbot with OpenAI and FAISS
+# PDF Q&A Systems
 
-This project implements a PDF-based Question & Answer (Q&A) system using OpenAI's embeddings and FAISS for efficient similarity search. The chatbot allows users to load a PDF document, build a searchable index, and query the document with natural language questions. It dynamically expands the context of the query results by considering adjacent sentences based on a similarity threshold.
+This repository contains two Python implementations for querying PDF documents using OpenAI embeddings and FAISS for similarity search. Both tools segment PDF content into manageable text chunks, compute embeddings, and then retrieve contextually relevant text for user questions. The two versions are designed for different usage scenarios:
 
-Features
-PDF Text Extraction: Extracts text from PDF files and intelligently segments it into manageable chunks.
+- **pdfqas.py**: Best for quick, one-time usage.
+- **pdfqal.py**: Ideal for repeated or multiple queries, with the added advantage of persistent indexing.
 
-Semantic Search: Uses OpenAI's embeddings to generate vector representations of text chunks and queries.
+## Overview
 
-Efficient Similarity Search: Utilizes FAISS for fast and accurate similarity search.
+### pdfqas.py – One-Time Quick Use
+- **Purpose**: This version is streamlined for users who want a fast, one-off query against a PDF document.
+- **Advantages**:
+  - **Ease of use**: Simply load the PDF, build the index, and ask your question.
+  - **Dynamic Similarity Threshold**: Uses a dynamic threshold to merge adjacent sentences for context expansion.
+- **When to use**: Choose this version if you only need to perform a single query or a few queries in one session and do not require persistent storage of the index.
 
-Dynamic Context Expansion: Expands query results by including adjacent sentences that meet a dynamic similarity threshold.
+### pdfqal.py – Multi-Use with Persistent Indexing
+- **Purpose**: This version is designed for scenarios where you expect to query the same PDF repeatedly.
+- **Advantages**:
+  - **Persistent Indexing**: After the initial index is built and saved to disk, subsequent sessions can load the saved FAISS index and text chunks, greatly speeding up query response time.
+  - **Resource Efficiency**: Avoids redundant computation of embeddings by reusing the stored index.
+- **When to use**: Opt for this version when you plan on making multiple queries over time, as it improves efficiency by not requiring the index to be rebuilt for every session.
 
-Customizable Parameters: Allows customization of chunk size, similarity thresholds, and the number of top results to return.
+## Common Features
 
-Requirements
-To run this project, you need the following dependencies:
+Both implementations share the following features:
+- **PDF Loading & Text Segmentation**: Uses `PyPDF2` to extract text and `nltk` to split text into sentences and merge them into chunks.
+- **Embeddings**: Leverages the OpenAI API to compute text embeddings.
+- **Similarity Search**: Uses FAISS for fast and accurate similarity search.
+- **Context Expansion**: Retrieves adjacent text chunks to provide more context around the most similar text.
 
-Python 3.7 or higher
+## Prerequisites
 
-Libraries:
+- **Python 3.7+**
+- **OpenAI API Key**: Set the environment variable `OPENAI_API_KEY` with your API key.
+- **Required Python Libraries**:
+  - `numpy`
+  - `faiss`
+  - `openai`
+  - `nltk`
+  - `PyPDF2`
+  - `pickle` (for pdfqal.py)
 
-PyPDF2 (for PDF text extraction)
+You can install the required libraries with:
+```bash
+pip install numpy faiss-cpu openai nltk PyPDF2
+```
 
-nltk (for sentence tokenization)
+## Setup
 
-numpy (for numerical operations)
+1. **Set up your OpenAI API key**:
+   ```bash
+   export OPENAI_API_KEY="your_openai_api_key"
+   ```
 
-faiss (for similarity search)
+2. **Download NLTK Resources**:
+   Both scripts automatically check and download the necessary NLTK resource (`punkt`). Make sure you have internet connectivity the first time you run the scripts.
 
-openai (for generating text embeddings)
+## Usage
 
-You can install the required libraries using pip:
+### Using pdfqas.py (One-Time Quick Use)
+1. **Load and Query PDF**:
+   - Edit the file path in the script to point to your PDF document.
+   - Run the script:
+     ```bash
+     python pdfqas.py
+     ```
+2. **Example Query**:
+   - When prompted, enter your question (e.g., "What is heat conduction?").
+   - The script will display the similarity score and the expanded context from the PDF.
 
+### Using pdfqal.py (Multi-Use with Persistent Index)
+1. **Build and Save the Index**:
+   - Edit the file path in the script to your PDF.
+   - The script will first try to load an existing FAISS index and text chunks. If not found, it will load the PDF and build the index, saving both to disk.
+   - Run the script:
+     ```bash
+     python pdfqal.py
+     ```
+2. **Subsequent Uses**:
+   - For future queries, the script will load the saved index from disk, speeding up the query process.
+3. **Example Query**:
+   - After the index is loaded, input your question at the prompt.
+   - The script returns results along with similarity scores.
 
-pip install PyPDF2 nltk numpy faiss-cpu openai
+## Summary
 
-Setup
+- **pdfqas.py**: Quick and straightforward for one-off queries, with dynamic context expansion.
+- **pdfqal.py**: Enhanced for multiple queries with persistent indexing, reducing overhead by reusing the pre-built index.
 
-Set OpenAI API Key:
+Choose the tool that best fits your needs:
+- For a single session or occasional query, use **pdfqas.py**.
+- For repeated use or when working with large documents over multiple sessions, use **pdfqal.py**.
 
-Obtain an API key from OpenAI.
-
-Set the API key as an environment variable:
-
-
-export OPENAI_API_KEY="your_openai_api_key_here"
-Download NLTK Resources:
-
-The project uses NLTK's punkt tokenizer. If not already downloaded, it will be automatically installed.
-
-Usage
-Step 1: Initialize the Chatbot
-from pdf_chatbot import PDFChatBot
-# Initialize the chatbot with your OpenAI API key
-bot = PDFChatBot(openai_api_key="your_openai_api_key_here")
-
-Step 2: Load a PDF Document
-# Load a PDF file and specify the maximum chunk size (default: 500 characters)
-bot.load_pdf("path/to/your/document.pdf", max_chunk_size=600)
-
-Step 3: Build the FAISS Index
-# Build the FAISS index for similarity search
-bot.build_index()
-
-Step 4: Query the Document
-# Query the document with a question
-results = bot.query_with_context(
-    question="smartphone addicted harmful",
-    top_k=2,  # Number of top results to return
-    similarity_ratio=0.85,  # Scaling factor for dynamic threshold
-    min_return_threshold=0.60  # Minimum similarity score for results
-)
-
-# Display the results
-for text, score in results:
-    print(f"Similarity Score: {score:.3f}\nExpanded Content:\n{text}\n{'-'*50}")
-
-# Example Output
-Similarity Score: 0.644
-Expanded Content:
-It is also reported that smartphone addiction causes accidents at home, workplace, traffic, and so forth, due to its dis- tracting features (Ghazizadeh & Boyle, 2009 , Nasar et al., 2008 , Vladisavljevic et al., 2009 ). It is considered that this situation may also endanger patient safety and the safety of healthcare employees themselves.
---------------------------------------------------
-Similarity Score: 0.605
-
-Expanded Content:
-One of the leading problems is smartphone addiction (nomophobia) (Hosgor et al., 2017 ), which is associated with a desire toconstantly check notifications (Oulasvirta et al., 2012 ), not turning off the phone all day, spending a long time on the phone before bed (Bragazzi & Del Puente, 2014 ), obsessive use, and increased anxiety level (Matusik & Mickel, 2011 ).
-Customization
-Chunk Size: Adjust the max_chunk_size parameter in load_pdf to control the size of text chunks.
-
-Similarity Thresholds: Modify similarity_ratio and min_return_threshold in query_with_context to fine-tune the results.
-
-Embedding Model: Change the embedding_model attribute in the PDFChatBot class to use a different OpenAI embedding model.
-
-Limitations
-PDF Quality: The accuracy of text extraction depends on the quality of the PDF file. Scanned or image-based PDFs may require OCR preprocessing.
-
-API Costs: Using OpenAI's API for embeddings incurs costs. Monitor your usage to avoid unexpected charges.
-
-Performance: Large PDF files may take longer to process and require more memory.
