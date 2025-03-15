@@ -66,7 +66,7 @@ pip install numpy faiss-cpu openai nltk PyPDF2
      python pdfqas.py
      ```
 2. **Example Query**:
-   - When prompted, enter your question (e.g., "What is heat conduction?").
+   - When prompted, enter the content you want to learn from the PDF.
    - The script will display the similarity score and the expanded context from the PDF.
 
 ### Using pdfqal.py (Multi-Use with Persistent Index)
