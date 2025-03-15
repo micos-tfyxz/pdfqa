@@ -6,6 +6,7 @@ import nltk
 from PyPDF2 import PdfReader
 from typing import List, Tuple
 
+
 class PDFChatBot:
     """
     Core class for the PDF-based Q&A system (Dynamic similarity threshold version)
@@ -182,14 +183,20 @@ if __name__ == "__main__":
     bot = PDFChatBot(openai_api_key=api_key)
     
     # Load the PDF document
-    bot.load_pdf("", max_chunk_size=600)
+    pdf_path = input("Enter the path to your PDF file: ")
+    bot.load_pdf(pdf_path, max_chunk_size=600)
     
     # Build vector index
     bot.build_index()
     
     # Perform query
-    results = bot.query_with_context("smartphone addicted harmful", top_k=2, 
-                                     similarity_ratio=0.85, min_return_threshold=0.60)
-
-    for text, score in results:
-        print(f"Similarity Score: {score:.3f}\nExpanded Content:\n{text}\n{'-'*50}")
+    while True:
+        question = input("Enter your question (or type 'exit' to quit): ")
+        if question.lower() == 'exit':
+            break
+        
+        results = bot.query_with_context(question, top_k=2, 
+                                         similarity_ratio=0.85, min_return_threshold=0.60)
+        
+        for text, score in results:
+            print(f"Similarity Score: {score:.3f}\nExpanded Content:\n{text}\n{'-'*50}")
