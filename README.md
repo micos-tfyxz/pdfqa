@@ -86,7 +86,7 @@ pip install numpy faiss-cpu openai nltk PyPDF2
 
 ---
 
-## Usage
+test file: "Quantifying streambed advection and conduction heat fluxes"
 
 ### **Using pdfqas.py (One-Time Quick Use)**
 1. **Run the script and provide the PDF path**:
@@ -107,7 +107,6 @@ pip install numpy faiss-cpu openai nltk PyPDF2
 
 ---
 
-test file: "Quantifying streambed advection and conduction heat fluxes"
 
 ### **Using pdfqal.py (Multi-Use with Persistent Index)**
 
