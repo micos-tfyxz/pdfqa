@@ -83,6 +83,88 @@ pip install numpy faiss-cpu openai nltk PyPDF2
    - After the index is loaded, input your question at the prompt.
    - The script returns results along with similarity scores.
 
+
+---
+
+## Usage
+
+### **Using pdfqas.py (One-Time Quick Use)**
+1. **Run the script and provide the PDF path**:
+   ```bash
+   python pdfqas.py
+   ```
+2. **Example Query**:
+   ```
+   Enter the path to your PDF file: C:/Users/汪有为/Downloads/test.pdf
+   Enter your question (or type 'exit' to quit): heat conduction affect
+   ```
+3. **Example Output**:
+   ```
+   Similarity Score: 0.472
+   Expanded Content:
+   Conductive heat ﬂuxes are generally estimated as nominally instantaneous functions of current bed temperature gradients[e.g., Hondzo and Stefan , 1994, Brown , 1969], and advective ﬂuxes are given nominally immediate action based on current temperatures in the bed and an estimate of the groundwater ﬂux [e.g., Kurylyk et al ., 2016].
+   ```
+
+---
+
+test file: "Quantifying streambed advection and conduction heat fluxes"
+
+### **Using pdfqal.py (Multi-Use with Persistent Index)**
+
+#### **Step 1: First-Time Setup (Building the Index)**
+- Run the script and specify the path to your PDF file:
+  ```bash
+  python pdfqal.py
+  ```
+- If no existing index is found, you will be prompted to enter the PDF file path:
+  ```
+  ⚠ Index or text chunk files not found
+  Enter the path to your PDF file: C:/Users/汪有为/Downloads/test.pdf
+  ```
+- The script will process the PDF and save the index:
+  ```
+  Index saved to pdf_index.faiss
+  Text chunks saved to pdf_index.faiss.pkl
+  ```
+
+#### **Step 2: Querying the PDF**
+- After the index is built, you can query the PDF:
+  ```
+  Please enter your question (type 'exit' to quit): heat conduction affect
+  ```
+- Since the index is now stored, subsequent runs will load it directly:
+  ```
+  Index loaded from pdf_index.faiss
+  Text chunks loaded from pdf_index.faiss.pkl
+  ```
+
+#### **Example Query Output**
+```text
+Similarity: 0.472
+Thorough reviews by Anderson [2005], Constantz [2008], Rau et al . [2014], Halloran et al . [2016a], and Irvine et al . [2016] provide a comprehensive overview of how heat tracer techniques can be applied to study surface-groundwater interactions. Although many studies have used streambed temperature as a tracer to study surface water-groundwater interactions, rigorous coupling of heat and ﬂuid ﬂow in the bed to drive stream energy balances has not been done. The bed is generally treated as an external boundary condition to the stream. Because bed heat contributions can seem a small contribution to the overall energy ﬂuxes, these approximations have been made as adjunct parameterizations on mass and energy conservation equations for the stream itself without reference to the energy and mass balance equations of the bed...
+```
+
+#### **Step 3: Reusing the Index in Future Sessions**
+- The next time you run `pdfqal.py`, it will load the saved index instead of rebuilding it:
+  ```
+  Index loaded from pdf_index.faiss
+  Text chunks loaded from pdf_index.faiss.pkl
+  ```
+- This significantly reduces processing time and makes multiple queries more efficient.
+
+---
+
+## Summary
+
+| Feature           | **pdfqas.py** | **pdfqal.py** |
+|------------------|--------------|--------------|
+| **Best for**      | One-time quick queries | Repeated queries with persistent storage |
+| **Index Persistence** | No | Yes (saves index to disk) |
+| **Processing Speed** | Needs to reprocess PDF each time | Faster after the first run |
+| **Context Expansion** | Yes | Yes (with enhanced retrieval logic) |
+| **Use Case** | Quickly extracting information from a PDF without saving data | Efficient querying over multiple sessions |
+
+
 ## Summary
 
 - **pdfqas.py**: Quick and straightforward for one-off queries, with dynamic context expansion.
