@@ -164,8 +164,6 @@ Thorough reviews by Anderson [2005], Constantz [2008], Rau et al . [2014], Hallo
 | **Use Case** | Quickly extracting information from a PDF without saving data | Efficient querying over multiple sessions |
 
 
-## Summary
-
 - **pdfqas.py**: Quick and straightforward for one-off queries, with dynamic context expansion.
 - **pdfqal.py**: Enhanced for multiple queries with persistent indexing, reducing overhead by reusing the pre-built index.
 
