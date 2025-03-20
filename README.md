@@ -1,38 +1,40 @@
 # PDF Q&A Systems
 
-This repository contains two Python implementations for querying PDF documents using OpenAI embeddings and FAISS for similarity search. Both tools segment PDF content into manageable text chunks, compute embeddings, and then retrieve contextually relevant text for user questions. The two versions are designed for different usage scenarios:
+This repository contains two optimized Python implementations for querying PDF documents using OpenAI embeddings and FAISS for similarity search. Both tools segment PDF content into manageable text chunks, compute embeddings, and retrieve contextually relevant text for user queries. The two versions cater to different usage scenarios:
 
-- **pdfqas.py**: Best for quick, one-time usage.
-- **pdfqal.py**: Ideal for repeated or multiple queries, with the added advantage of persistent indexing.
+- **pdfqas.py**: Best for quick, one-time queries with a focus on speed. Every time a question is asked, the script reloads the PDF and reprocesses the data.
+- **pdfqal.py**: Designed for repeated queries with persistent indexing and efficient memory management. Once the index is built and saved, it can be reused across multiple queries without reloading the PDF.
 
 ## Overview
 
-### pdfqas.py – One-Time Quick Use
-- **Purpose**: This version is streamlined for users who want a fast, one-off query against a PDF document.
+### pdfqas.py – Fast One-Time Querying
+- **Purpose**: Optimized for users who need a fast, one-off query against a PDF.
 - **Advantages**:
-  - **Ease of use**: Simply load the PDF, build the index, and ask your question.
-  - **Dynamic Similarity Threshold**: Uses a dynamic threshold to merge adjacent sentences for context expansion.
-- **When to use**: Choose this version if you only need to perform a single query or a few queries in one session and do not require persistent storage of the index.
+  - **Lightweight**: Loads a PDF, builds an index, and queries in a single session.
+  - **Fixed-size chunking**: Uses simple segmentation without sentence merging.
+  - **High-speed search**: Always employs a Flat FAISS index for maximum performance.
+- **Limitations**: Each time a query is made, the PDF must be reprocessed, making it inefficient for repeated use.
+- **When to use**: Choose this version for quick, single-session queries where you do not need to save the index.
 
-### pdfqal.py – Multi-Use with Persistent Indexing
-- **Purpose**: This version is designed for scenarios where you expect to query the same PDF repeatedly.
+### pdfqal.py – Multi-Session Querying with Persistent Index
+- **Purpose**: Built for scenarios where a PDF is queried multiple times.
 - **Advantages**:
-  - **Persistent Indexing**: After the initial index is built and saved to disk, subsequent sessions can load the saved FAISS index and text chunks, greatly speeding up query response time.
-  - **Resource Efficiency**: Avoids redundant computation of embeddings by reusing the stored index.
-- **When to use**: Opt for this version when you plan on making multiple queries over time, as it improves efficiency by not requiring the index to be rebuilt for every session.
+  - **Persistent Indexing**: Saves the FAISS index and text chunks to disk, reducing redundant computations.
+  - **Optimized Chunking**: Dynamically merges sentences for better context handling.
+  - **Memory-Efficient**: Frees embeddings from memory after index construction.
+- **Efficiency**: After the first use, subsequent queries run significantly faster since the document does not need to be reprocessed.
+- **When to use**: Use this version when you expect to query the same PDF repeatedly, as it avoids reprocessing the document in each session.
 
 ## Common Features
-
-Both implementations share the following features:
-- **PDF Loading & Text Segmentation**: Uses `PyPDF2` to extract text and `nltk` to split text into sentences and merge them into chunks.
-- **Embeddings**: Leverages the OpenAI API to compute text embeddings.
-- **Similarity Search**: Uses FAISS for fast and accurate similarity search.
-- **Context Expansion**: Retrieves adjacent text chunks to provide more context around the most similar text.
+- **PDF Loading & Text Segmentation**: Uses `PyPDF2` for text extraction and `nltk` for text tokenization.
+- **Embeddings**: Leverages OpenAI's embedding API (`text-embedding-3-small`).
+- **Similarity Search**: Uses FAISS for fast and accurate retrieval.
+- **Context Expansion**: Retrieves adjacent text chunks for better contextual understanding.
 
 ## Prerequisites
 
 - **Python 3.7+**
-- **OpenAI API Key**: Set the environment variable `OPENAI_API_KEY` with your API key.
+- **OpenAI API Key**: Set as an environment variable `OPENAI_API_KEY`.
 - **Required Python Libraries**:
   - `numpy`
   - `faiss`
@@ -40,134 +42,45 @@ Both implementations share the following features:
   - `nltk`
   - `PyPDF2`
   - `pickle` (for pdfqal.py)
-
-You can install the required libraries with:
-```bash
-pip install numpy faiss-cpu openai nltk PyPDF2
-```
-
-## Setup
-
-1. **Set up your OpenAI API key**:
-   ```bash
-   export OPENAI_API_KEY="your_openai_api_key"
-   ```
-
-2. **Download NLTK Resources**:
-   Both scripts automatically check and download the necessary NLTK resource (`punkt`). Make sure you have internet connectivity the first time you run the scripts.
+  ```bash
+  pip install numpy faiss-cpu openai nltk PyPDF2 pickle
+  ```
 
 ## Usage
 
-### Using pdfqas.py (One-Time Quick Use)
-1. **Load and Query PDF**:
-   - Edit the file path in the script to point to your PDF document.
-   - Run the script:
-     ```bash
-     python pdfqas.py
-     ```
-2. **Example Query**:
-   - When prompted, enter the content you want to learn from the PDF.
-   - The script will display the similarity score and the expanded context from the PDF.
-
-### Using pdfqal.py (Multi-Use with Persistent Index)
-1. **Build and Save the Index**:
-   - Edit the file path in the script to your PDF.
-   - The script will first try to load an existing FAISS index and text chunks. If not found, it will load the PDF and build the index, saving both to disk.
-   - Run the script:
-     ```bash
-     python pdfqal.py
-     ```
-2. **Subsequent Uses**:
-   - For future queries, the script will load the saved index from disk, speeding up the query process.
-3. **Example Query**:
-   - After the index is loaded, input your question at the prompt.
-   - The script returns results along with similarity scores.
-
-
----
-
-test file: "Quantifying streambed advection and conduction heat fluxes"
-
-### **Using pdfqas.py (One-Time Quick Use)**
-1. **Run the script and provide the PDF path**:
-   ```bash
-   python pdfqas.py
-   ```
-2. **Example Query**:
-   ```
-   Enter the path to your PDF file: C:/Users/汪有为/Downloads/test.pdf
-   Enter your question (or type 'exit' to quit): heat conduction affect
-   ```
-3. **Example Output**:
-   ```
-   Similarity Score: 0.472
-   Expanded Content:
-   Conductive heat ﬂuxes are generally estimated as nominally instantaneous functions of current bed temperature gradients[e.g., Hondzo and Stefan , 1994, Brown , 1969], and advective ﬂuxes are given nominally immediate action based on current temperatures in the bed and an estimate of the groundwater ﬂux [e.g., Kurylyk et al ., 2016].
-   ```
-
----
-
-
-### **Using pdfqal.py (Multi-Use with Persistent Index)**
-
-#### **Step 1: First-Time Setup (Building the Index)**
-- Run the script and specify the path to your PDF file:
-  ```bash
-  python pdfqal.py
-  ```
-- If no existing index is found, you will be prompted to enter the PDF file path:
-  ```
-  ⚠ Index or text chunk files not found
-  Enter the path to your PDF file: C:/Users/汪有为/Downloads/test.pdf
-  ```
-- The script will process the PDF and save the index:
-  ```
-  Index saved to pdf_index.faiss
-  Text chunks saved to pdf_index.faiss.pkl
-  ```
-
-#### **Step 2: Querying the PDF**
-- After the index is built, you can query the PDF:
-  ```
-  Please enter your question (type 'exit' to quit): heat conduction affect
-  ```
-- Since the index is now stored, subsequent runs will load it directly:
-  ```
-  Index loaded from pdf_index.faiss
-  Text chunks loaded from pdf_index.faiss.pkl
-  ```
-
-#### **Example Query Output**
-```text
-Similarity: 0.472
-Thorough reviews by Anderson [2005], Constantz [2008], Rau et al . [2014], Halloran et al . [2016a], and Irvine et al . [2016] provide a comprehensive overview of how heat tracer techniques can be applied to study surface-groundwater interactions. Although many studies have used streambed temperature as a tracer to study surface water-groundwater interactions, rigorous coupling of heat and ﬂuid ﬂow in the bed to drive stream energy balances has not been done. The bed is generally treated as an external boundary condition to the stream. Because bed heat contributions can seem a small contribution to the overall energy ﬂuxes, these approximations have been made as adjunct parameterizations on mass and energy conservation equations for the stream itself without reference to the energy and mass balance equations of the bed...
+### Using pdfqas.py (Fast One-Time Query)
+```bash
+python pdfqas.py
 ```
+- Enter the PDF file path when prompted.
+- The script will extract text from the PDF, process it, and build an index.
+- Each time a new question is asked, the entire document is reprocessed, which can be time-consuming.
+- Input your question, and the script will return relevant text from the document.
 
-#### **Step 3: Reusing the Index in Future Sessions**
-- The next time you run `pdfqal.py`, it will load the saved index instead of rebuilding it:
-  ```
-  Index loaded from pdf_index.faiss
-  Text chunks loaded from pdf_index.faiss.pkl
-  ```
-- This significantly reduces processing time and makes multiple queries more efficient.
+### Using pdfqal.py (Multi-Use with Persistent Indexing)
+```bash
+python pdfqal.py
+```
+- The script attempts to load a pre-built FAISS index.
+- If no index is found, it processes the PDF and saves the index to disk for future use.
+- Queries run significantly faster in subsequent uses since the index is precomputed and does not require reprocessing the PDF.
+- Once the index is built, you can ask multiple questions without reloading the document.
 
----
-
-## Summary
+## Comparison Table
 
 | Feature           | **pdfqas.py** | **pdfqal.py** |
 |------------------|--------------|--------------|
 | **Best for**      | One-time quick queries | Repeated queries with persistent storage |
-| **Index Persistence** | No | Yes (saves index to disk) |
-| **Processing Speed** | Needs to reprocess PDF each time | Faster after the first run |
-| **Context Expansion** | Yes | Yes (with enhanced retrieval logic) |
-| **Use Case** | Quickly extracting information from a PDF without saving data | Efficient querying over multiple sessions |
+| **Index Persistence** | No | Yes (saves to disk) |
+| **Processing Speed** | Rebuilds index every time | Faster after initial setup |
+| **Chunking Strategy** | Fixed-size chunks | Sentence-aware merging |
+| **Data Reuse** | No, reprocesses document for every query | Yes, reuses stored index |
+| **Use Case** | Quickly extracting information from a PDF | Efficient querying over multiple sessions |
+
+## Conclusion
+- **Use `pdfqas.py`** for simple, one-time queries where processing speed is not critical.
+- **Use `pdfqal.py`** if you need to query the same document multiple times efficiently, as it avoids unnecessary recomputation and significantly reduces response time.
 
 
-- **pdfqas.py**: Quick and straightforward for one-off queries, with dynamic context expansion.
-- **pdfqal.py**: Enhanced for multiple queries with persistent indexing, reducing overhead by reusing the pre-built index.
 
-Choose the tool that best fits your needs:
-- For a single session or occasional query, use **pdfqas.py**.
-- For repeated use or when working with large documents over multiple sessions, use **pdfqal.py**.
 
